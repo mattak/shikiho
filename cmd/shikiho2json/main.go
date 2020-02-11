@@ -71,7 +71,7 @@ func runFromStdin(c *cli.Context) bool {
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "shikiho"
+	app.Name = "shikiho2json"
 	app.Usage = "extract shikiho data json from html archive"
 	app.Version = "0.0.1"
 	app.ArgsUsage = "[html_file_path]"

@@ -29,6 +29,14 @@ type PerformanceOfYear struct {
 	DividendPerStock float64 `json:"dividend_per_stock"`
 }
 
+func (p PerformanceOfYear) IsYearlyRange() bool {
+	return p.Prefix == "単" || p.Prefix == "連" || p.Prefix == "◎" || p.Prefix == "◇" || p.Prefix == "□"
+}
+
+func (p1 PerformanceOfYear) IsSequentialRange(p2 PerformanceOfYear) bool {
+	return p1.IsYearlyRange() || p2.IsYearlyRange()
+}
+
 func ParsePerformance(doc *goquery.Selection) ([]PerformanceOfYear, error) {
 	table := ParseTable(doc)
 
