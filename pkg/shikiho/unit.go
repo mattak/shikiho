@@ -1,6 +1,7 @@
 package shikiho
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -26,6 +27,7 @@ func ParseFloat(value string) float64 {
 	value = strings.Replace(value, "*", "", -1)
 	value = strings.Replace(value, ",", "", -1)
 	value = strings.Replace(value, "‥", "0", -1)
+	value = strings.Replace(value, "--", "0", -1)
 
 	if i := strings.Index(value, "〜"); i != -1 {
 		value = value[0:i]
@@ -62,4 +64,58 @@ func ParseJapanMoneyUnit(raw string) int {
 	}
 
 	panic(fmt.Sprintf("unknown unit: %s", unit))
+}
+
+func ParsePercentage(raw string) float64 {
+	regex := regexp.MustCompile("\\s*(\\-?[\\d\\.\\,]+)\\s*%\\s*")
+
+	if !regex.MatchString(raw) {
+		fmt.Fprintf(os.Stderr, "parse percentage failed: %s\n", raw)
+		return 0
+	}
+
+	group := regex.FindStringSubmatch(raw)
+	value := ParseFloat(group[1])
+
+	return value
+}
+
+func ParsePER(raw string) (float64, float64) {
+	regex1 := regexp.MustCompile("^\\s*(\\-?[\\d\\.\\,]+|\\-\\-)\\s*\\((\\-?[\\d\\.\\,]+|\\-\\-)\\)\\s*")
+
+	if !regex1.MatchString(raw) {
+		fmt.Fprintf(os.Stderr, "parse per failed: %s\n", raw)
+		return 0, 0
+	}
+
+	group := regex1.FindStringSubmatch(raw)
+	value1 := ParseFloat(group[1])
+	value2 := ParseFloat(group[2])
+	return value1, value2
+}
+
+func ParsePBR(raw string) float64 {
+	regex := regexp.MustCompile("^\\s*(\\-?[\\d\\.\\,]+)\\s*倍\\s*")
+
+	if !regex.MatchString(raw) {
+		fmt.Fprintf(os.Stderr, "parse pbr failed: %s\n", raw)
+		return 0
+	}
+
+	group := regex.FindStringSubmatch(raw)
+	value := ParseFloat(group[1])
+	return value
+}
+
+func ParseYearMonth(value string) (int, int, error) {
+	regex := regexp.MustCompile("^\\s*(\\d+)\\.(\\d+)\\s*$")
+
+	group := regex.FindStringSubmatch(value)
+	if len(group) > 0 {
+		year, _ := strconv.Atoi(group[1])
+		month, _ := strconv.Atoi(group[2])
+		return year, month, nil
+	}
+
+	return 0, 0, errors.New(fmt.Sprintf("parse failed year, month: %s", value))
 }
