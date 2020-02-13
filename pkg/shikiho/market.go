@@ -33,7 +33,7 @@ func (market *Market) parseStockInfo(doc *goquery.Selection) {
 
 		if strings.Contains(found.Text(), "予想PER") {
 			market.PER, market.NextPER = ParsePER(selection.Find("dd").First().Text())
-		} else if found.Text() == "予想PBR" {
+		} else if found.Text() == "実績PBR" {
 			market.PBR = ParsePBR(selection.Find("dd").First().Text())
 		}
 	})
@@ -47,6 +47,6 @@ func ParseMarket(doc *goquery.Selection) (*Market, error) {
 	market := Market{}
 	market.parseMarketCapitalization(doc.Find("div.overview div.sub div.stock dl.mc dd"))
 	market.parseROE(doc.Find("div.sub div.block div.table dl"))
-	market.parseStockInfo(doc.Find("div.section div.block div.data div.stock"))
+	market.parseStockInfo(doc.Find("div.section div.block div.data div.stock dl"))
 	return &market, nil
 }
